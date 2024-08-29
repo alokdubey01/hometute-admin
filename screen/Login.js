@@ -1,5 +1,13 @@
-import React, { useState,useEffect } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import Entypo from "@expo/vector-icons/Entypo";
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 import { Stack, TextInput, IconButton } from "@react-native-material/core";
@@ -7,7 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BASE_URL } from "../config";
 import axios from "axios";
 
-const Forgot = ({navigation}) => {
+const Forgot = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(true);
@@ -32,6 +40,11 @@ const Forgot = ({navigation}) => {
 
   function handleLogin() {
     setLoading(true);
+    if (email === "" || password === "") {
+      Alert.alert("Error", "Email and Password are required");
+      setLoading(false);
+      return;
+    }
     axios
       .post(`${BASE_URL}admin/login`, {
         email: email,
@@ -46,8 +59,9 @@ const Forgot = ({navigation}) => {
         console.error(err);
         setVisible(true);
         setLoading(false);
+        Alert.alert("Error", "Invalid email or password");
       });
-  }  
+  }
 
   return (
     <View style={styles.container}>
@@ -99,13 +113,20 @@ const Forgot = ({navigation}) => {
           <TouchableOpacity style={styles.rememberButton}>
             <Text style={styles.rememberText}></Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('Forgot')} style={styles.forgotButton}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Forgot")}
+            style={styles.forgotButton}
+          >
             <Text style={styles.forgotText}>Forgot Password?</Text>
           </TouchableOpacity>
         </View>
 
         <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Login</Text>
+          {loading ? (
+            <ActivityIndicator size="small" color="#FFF" />
+          ) : (
+            <Text style={styles.buttonText}>Login</Text>
+          )}
         </TouchableOpacity>
 
         {/* <View style={styles.signupContainer}>

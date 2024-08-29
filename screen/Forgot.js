@@ -1,15 +1,23 @@
-import React, { useState,useEffect } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, Image, Alert } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import Entypo from "@expo/vector-icons/Entypo";
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 import { Stack, TextInput, IconButton } from "@react-native-material/core";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BASE_URL } from "../config";
 import axios from "axios";
-import * as IntentLauncher from 'expo-intent-launcher';
-import { Platform } from 'react-native';
+import * as IntentLauncher from "expo-intent-launcher";
+import { Platform } from "react-native";
 
-const Forgot = ({navigation}) => {
+const Forgot = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [visible, setVisible] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -33,27 +41,27 @@ const Forgot = ({navigation}) => {
 
   const openMailApp = async () => {
     try {
-      if (Platform.OS === 'android') {
-        const activityAction = 'android.intent.action.MAIN';
+      if (Platform.OS === "android") {
+        const activityAction = "android.intent.action.MAIN";
         const intentParams = {
-          category: 'android.intent.category.APP_EMAIL',
+          category: "android.intent.category.APP_EMAIL",
           flags: 268435456, // FLAG_ACTIVITY_NEW_TASK
         };
-  
+
         await IntentLauncher.startActivityAsync(activityAction, intentParams);
-        console.log('Mail app opened');
+        console.log("Mail app opened");
       } else {
-        console.log('This method is mainly for Android. For iOS, use Linking.');
+        console.log("This method is mainly for Android. For iOS, use Linking.");
       }
     } catch (error) {
-      console.error('An error occurred while launching the intent:', error);
+      console.error("An error occurred while launching the intent:", error);
     }
   };
 
   function handleForgot() {
     setLoading(true);
-    if (email === '') {
-      Alert.alert('Error', 'Email is required');
+    if (email === "") {
+      Alert.alert("Error", "Email is required");
       setLoading(false);
       return;
     }
@@ -63,14 +71,14 @@ const Forgot = ({navigation}) => {
       })
       .then((res) => {
         setLoading(false);
-        Alert.alert('Success', res.data.message);
+        Alert.alert("Success", res.data.message);
         openMailApp();
       })
       .catch((err) => {
         console.error(err);
         setVisible(true);
         setLoading(false);
-        Alert.alert('Error', err.response.data.message);
+        Alert.alert("Error", err.response.data.message);
       });
   }
 
@@ -78,9 +86,7 @@ const Forgot = ({navigation}) => {
     <View style={styles.container}>
       <TouchableOpacity
         style={styles.backarrow}
-        onPress={() => 
-          navigation.goBack()
-        }
+        onPress={() => navigation.goBack()}
       >
         <Entypo name="chevron-left" size={24} color="black" />
       </TouchableOpacity>
@@ -112,12 +118,19 @@ const Forgot = ({navigation}) => {
         </View>
 
         <TouchableOpacity style={styles.loginButton} onPress={handleForgot}>
-          <Text style={styles.buttonText}>Send Request</Text>
+          {loading ? (
+            <ActivityIndicator size="small" color="#FFF" />
+          ) : (
+            <Text style={styles.buttonText}>Send Request</Text>
+          )}
         </TouchableOpacity>
 
         <View style={styles.signupContainer}>
           <Text style={styles.signupText}>Remember your password?</Text>
-          <TouchableOpacity style={styles.signupButton} onPress={() => navigation.navigate('Login')}>
+          <TouchableOpacity
+            style={styles.signupButton}
+            onPress={() => navigation.navigate("Login")}
+          >
             <Text style={styles.signupButtonText}>Login</Text>
           </TouchableOpacity>
         </View>
