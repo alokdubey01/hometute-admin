@@ -47,7 +47,7 @@ const Forgot = ({navigation}) => {
         setVisible(true);
         setLoading(false);
       });
-  }
+  }  
 
   return (
     <View style={styles.container}>
@@ -80,6 +80,8 @@ const Forgot = ({navigation}) => {
         <View style={styles.inputContainer}>
           <TextInput
             inputMode="password"
+            secureTextEntry={true}
+            eyeIcon={true}
             leading={(props) => <Icon name="key" {...props} />}
             style={styles.input}
             color="black"
@@ -95,9 +97,9 @@ const Forgot = ({navigation}) => {
 
         <View style={styles.rememberContainer}>
           <TouchableOpacity style={styles.rememberButton}>
-            <Text style={styles.rememberText}>Remember Me</Text>
+            <Text style={styles.rememberText}></Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.forgotButton}>
+          <TouchableOpacity onPress={() => navigation.navigate('Forgot')} style={styles.forgotButton}>
             <Text style={styles.forgotText}>Forgot Password?</Text>
           </TouchableOpacity>
         </View>
@@ -106,12 +108,12 @@ const Forgot = ({navigation}) => {
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
 
-        <View style={styles.signupContainer}>
+        {/* <View style={styles.signupContainer}>
           <Text style={styles.signupText}>Don't have account?</Text>
           <TouchableOpacity style={styles.signupButton}>
             <Text style={styles.signupButtonText}>Sign up</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
       </View>
     </View>
   );

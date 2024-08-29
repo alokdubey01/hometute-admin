@@ -1,15 +1,16 @@
 import React, { useState,useEffect } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Image, Alert } from "react-native";
 import Entypo from "@expo/vector-icons/Entypo";
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 import { Stack, TextInput, IconButton } from "@react-native-material/core";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BASE_URL } from "../config";
 import axios from "axios";
+import * as IntentLauncher from 'expo-intent-launcher';
+import { Platform } from 'react-native';
 
 const Forgot = ({navigation}) => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(true);
   const [loading, setLoading] = useState(false);
 
@@ -30,22 +31,46 @@ const Forgot = ({navigation}) => {
     }
   };
 
-  function handleLogin() {
+  const openMailApp = async () => {
+    try {
+      if (Platform.OS === 'android') {
+        const activityAction = 'android.intent.action.MAIN';
+        const intentParams = {
+          category: 'android.intent.category.APP_EMAIL',
+          flags: 268435456, // FLAG_ACTIVITY_NEW_TASK
+        };
+  
+        await IntentLauncher.startActivityAsync(activityAction, intentParams);
+        console.log('Mail app opened');
+      } else {
+        console.log('This method is mainly for Android. For iOS, use Linking.');
+      }
+    } catch (error) {
+      console.error('An error occurred while launching the intent:', error);
+    }
+  };
+
+  function handleForgot() {
     setLoading(true);
+    if (email === '') {
+      Alert.alert('Error', 'Email is required');
+      setLoading(false);
+      return;
+    }
     axios
-      .post(`${BASE_URL}admin/login`, {
+      .post(`${BASE_URL}admin/forgotPassword`, {
         email: email,
-        password: password,
       })
       .then((res) => {
-        AsyncStorage.setItem("token", res.data.token);
         setLoading(false);
-        navigation.navigate("/", { name: "Admin" });
+        Alert.alert('Success', res.data.message);
+        openMailApp();
       })
       .catch((err) => {
         console.error(err);
         setVisible(true);
         setLoading(false);
+        Alert.alert('Error', err.response.data.message);
       });
   }
 
@@ -53,23 +78,22 @@ const Forgot = ({navigation}) => {
     <View style={styles.container}>
       <TouchableOpacity
         style={styles.backarrow}
-        onPress={
-          navigation.navi
+        onPress={() => 
+          navigation.goBack()
         }
-        // onPress={() => navigation.back()}
       >
         <Entypo name="chevron-left" size={24} color="black" />
       </TouchableOpacity>
       <Image
         // source={require('./green-leaves.jpg')} // Replace with your image path
         source={{
-          uri: "https://images.unsplash.com/photo-1498612753354-772a30629934?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjR8fGFic3RyYWN0JTIwYmFja2dyb3VuZCUyMGdyZWVufGVufDB8fDB8fHww",
+          uri: "https://images.unsplash.com/photo-1712540457257-88a5892e2234?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8eWVsbG93JTIwbmF0dXJlfGVufDB8fDB8fHww",
         }}
         style={styles.backgroundImage}
       />
       <View style={styles.formContainer}>
-        <Text style={styles.title}>Welcom Back</Text>
-        <Text style={styles.subtitle}>Login to your account</Text>
+        <Text style={styles.title}>Forgot Password</Text>
+        <Text style={styles.subtitle}>Generate a token?</Text>
 
         <View style={styles.inputContainer}>
           <TextInput
@@ -78,7 +102,7 @@ const Forgot = ({navigation}) => {
             style={styles.input}
             color="black"
             inputContainerStyle={{
-              backgroundColor: "#DAE6DE",
+              backgroundColor: "#fee8aa",
               borderRadius: 30,
             }}
             placeholder="Email Address"
@@ -87,39 +111,14 @@ const Forgot = ({navigation}) => {
           />
         </View>
 
-        <View style={styles.inputContainer}>
-          <TextInput
-            inputMode=""
-            leading={(props) => <Icon name="key" {...props} />}
-            style={styles.input}
-            color="black"
-            inputContainerStyle={{
-              backgroundColor: "#DAE6DE",
-              borderRadius: 30,
-            }}
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-          />
-        </View>
-
-        <View style={styles.rememberContainer}>
-          <TouchableOpacity style={styles.rememberButton}>
-            <Text style={styles.rememberText}>Remember Me</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.forgotButton}>
-            <Text style={styles.forgotText}>Forgot Password?</Text>
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Login</Text>
+        <TouchableOpacity style={styles.loginButton} onPress={handleForgot}>
+          <Text style={styles.buttonText}>Send Request</Text>
         </TouchableOpacity>
 
         <View style={styles.signupContainer}>
-          <Text style={styles.signupText}>Don't have account?</Text>
-          <TouchableOpacity style={styles.signupButton}>
-            <Text style={styles.signupButtonText}>Sign up</Text>
+          <Text style={styles.signupText}>Remember your password?</Text>
+          <TouchableOpacity style={styles.signupButton} onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.signupButtonText}>Login</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -130,7 +129,7 @@ const Forgot = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#fee8aa",
   },
   backgroundImage: {
     position: "absolute",
@@ -199,7 +198,7 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   loginButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#E2A602",
     padding: 12,
     width: "80%",
     borderRadius: 8,
@@ -224,13 +223,13 @@ const styles = StyleSheet.create({
   },
   signupButtonText: {
     fontSize: 14,
-    color: "#4CAF50",
+    color: "teal",
   },
   backarrow: {
     position: "absolute",
     top: 50,
     left: 20,
-    backgroundColor: "#DAE6DE",
+    backgroundColor: "#fee8aa",
     zIndex: 99,
     padding: 10,
     borderRadius: 50,
